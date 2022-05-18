@@ -41,8 +41,8 @@
 </head>
 
 <script type="text/javascript">
-	var qrMsg = ""
-
+	var qrMsg = "http://qr.nlotto.co.kr/?v=0747m011821252728m020710112628m030609172528m040715182428m0709121423281614207942"
+	var total_selected_num_list =[]
 	// 스캔
 	function startScan() {
 		var video = document.createElement("video");		
@@ -105,6 +105,7 @@
 
 					// return을 써서 함수를 빠져나가면 QR코드 프로그램이 종료된다.
 					$('#qrFrame').hide();
+					qrParsing();
 					return;
 				}
 				// QR코드 인식에 실패한 경우
@@ -121,12 +122,70 @@
 	function openCamera() {
 		$('#qrFrame').show();
 		startScan();
+		/* qrParsing() */
 	}
+	
+	//데이터 파싱
+	function qrParsing(){
+		var msg = qrMsg;
+		//http://qr.nlotto.co.kr/?v=0747m011821252728m020710112628m030609172528m040715182428m0709121423281614207942
+		
+		var table_html = ""		
+		
+		var split_list = msg.split("m");
+		for (var i = 1; i < split_list.length; i++) {
+			
+			
+			var split = split_list[i]
+			
+			var num1 = Number(split.substring(0,2));
+			var num2 = Number(split.substring(2,4));
+			var num3 = Number(split.substring(4,6));
+			var num4 = Number(split.substring(6,8));
+			var num5 = Number(split.substring(8,10));
+			var num6 = Number(split.substring(10,12));
+			
+			var selected_num_list = [num1, num2, num3, num4, num5, num6];
+			
+			total_selected_num_list = total_selected_num_list.concat(selected_num_list);
+			total_selected_num_list = [...new Set(total_selected_num_list)]
+			total_selected_num_list.sort(function(a, b)  {
+				  if(a > b) return 1;
+				  if(a === b) return 0;
+				  if(a < b) return -1;
+				});
+			console.log(i, selected_num_list)
+			
+			
+			//여기서 부터 html 코드
+			table_html += '<tr>'
+			table_html += '<td>'+ i +'</td>'
+			
+			for (var j = 0; j < selected_num_list.length; j++) {
+				var array_element = selected_num_list[j];
+				table_html += '<td>' + array_element + '</td>'
+				console.log(i, array_element)
+			}
+			
+			table_html += '</tr>'
+			
+		}	
+		
+		console.log('전체', total_selected_num_list)
+		console.log(table_html)
+		$('#dataBody').html('').html(table_html);
+		console.log(table_html)
+		
+	}
+	
+	
 </script>
 
 <body>
 <div class="main_page">
+	
 	<main align="center">
+	<h1>한장만 더?</h1>
 	<div id='qrFrame' align="center" class='modal'>
 		<div></div>
 		<div id="frame">
@@ -142,15 +201,24 @@
 		<br/>
 		<div></div>
 		<div id="test" width="100%">
-			<h1>QR 코드 스캔 결과</h1>
-			<div id="output">
-				<div id="outputMessage">
-					
-				</div>
-				<div id="outputLayer" hidden>
-					<span id="outputData"></span>
-				</div>
-			</div>
+			<h4>QR 코드 스캔 결과</h4>
+			<table
+			style="width: 80%;left: 10%;position: absolute;text-align: center;margin-top: 4%;">
+			<thead>
+				<tr>
+					<td>게임</td>
+					<td>num1</td>
+					<td>num2</td>
+					<td>num3</td>
+					<td>num4</td>
+					<td>num5</td>
+					<td>num6</td>
+				</tr>
+			</thead>
+			<tbody id='dataBody'>
+				<tr> <td colspan=7> qr코드를 스캔해 주세요 </td></tr>
+			</tbody>
+		</table>
 		</div>
 	</main>
 </div>
