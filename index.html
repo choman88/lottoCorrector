@@ -62,7 +62,7 @@
 			canvas.stroke();
 		}
 
-	        // 카메라 사용시
+        // 카메라 사용시
 		navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
      		    video.srcObject = stream;
       		    video.setAttribute("playsinline", true);      // iOS 사용시 전체 화면을 사용하지 않음을 전달
@@ -159,23 +159,23 @@
 			
 			
 			//여기서 부터 html 코드
-			table_html += '<tr>'
-			table_html += '<td>'+ i +'</td>'
+			table_html += '<tr>';
+			table_html += '<td>'+ i +'</td>';
 			
 			for (var j = 0; j < selected_num_list.length; j++) {
 				var array_element = selected_num_list[j];
-				table_html += '<td>' + array_element + '</td>'
-				console.log(i, array_element)
+				table_html += '<td>' + array_element + '</td>';
+				console.log(i, array_element);
 			}
 			
-			table_html += '</tr>'
+			table_html += '</tr>';
 			
 		}	
 		
-		console.log('전체', total_selected_num_list)
-		console.log(table_html)
+		console.log('전체', total_selected_num_list);
+		console.log(table_html);
 		$('#dataBody').html('').html(table_html);
-		console.log(table_html)
+		console.log(table_html);
 		
 	}
 	
@@ -186,7 +186,7 @@
 <div class="main_page">
 	
 	<main align="center">
-	<h1>한장만 더?test2</h1>
+	<h1>한장만 더?test3</h1>
 	<div id='qrFrame' align="center" class='modal'>
 		<div></div>
 		<div id="frame">
@@ -203,8 +203,7 @@
 		<div></div>
 		<div id="test" width="100%">
 			<h4>QR 코드 스캔 결과</h4>
-			<table
-			style="width: 80%;left: 10%;position: absolute;text-align: center;margin-top: 4%;">
+			<table style="width: 80%;left: 10%;position: absolute;text-align: center;margin-top: 4%;">
 			<thead>
 				<tr>
 					<td>게임</td>
@@ -219,8 +218,18 @@
 			<tbody id='dataBody'>
 				<tr> <td colspan=7> qr코드를 스캔해 주세요 </td></tr>
 			</tbody>
+			
+			<div id="output">
+				<div id="outputMessage">
+					
+				</div>
+				<div id="outputLayer" hidden>
+					<span id="outputData"></span>
+				</div>
+			</div>
 		</table>
 		</div>
+					
 	</main>
 </div>
 </body>
