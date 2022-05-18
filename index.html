@@ -1,460 +1,122 @@
-<!DOCTYPE tml>
 <html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <title>jsQR Demo</title>
+  <script src="./jsQR.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Ropa Sans', sans-serif;
+      color: #333;
+      max-width: 640px;
+      margin: 0 auto;
+      position: relative;
+    }
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://unpkg.com/moment-lunar@0.0.4/moment-lunar.min.js"></script>
+    #githubLink {
+      position: absolute;
+      right: 0;
+      top: 12px;
+      color: #2D99FF;
+    }
 
+    h1 {
+      margin: 10px 0;
+      font-size: 40px;
+    }
 
-<title>일정섹</title>
+    #loadingMessage {
+      text-align: center;
+      padding: 40px;
+      background-color: #eee;
+    }
 
-<style>
+    #canvas {
+      width: 100%;
+    }
 
+    #output {
+      margin-top: 20px;
+      background: #eee;
+      padding: 10px;
+      padding-bottom: 0;
+    }
 
-html {
-	height: 100%;
-}
+    #output div {
+      padding-bottom: 10px;
+      word-wrap: break-word;
+    }
 
-body {
-	height: 100%;
-	margin: 0;
-	position: relative;
-}
-
-table {
-	width: 100%;
-	border: 1px solid #444444;
-	background-color: white;
-}
-
-th, td {
-	border: 1px solid #444444;
-}
-
-#calendar {
-	height: 99%;
-	box-sizing: border-box;
-	padding: 0.5%;
-}
-
-.calendar__day {
-	display: inline-block;
-	vertical-align: bottom;
-	width: calc(97%/ 7);
-	height: calc(98%/ 5);
-	box-sizing: border-box;
-	border-radius: 5px;
-	padding: 20px;
-}
-
-.horizontalGutter {
-	margin-right: 0.5%;
-}
-
-.verticalGutter {
-	margin-top: 0.5%;
-}
-
-.btn {
-	cursor: pointer;
-}
-
-.modal{
-	width:50%;
-	top:50px;
-	position:absolute;
-	left:25%;
-	background-color:black;
-	text-align:center;
-	padding-top:10px;
-	display:none;
-}
-</style>
-<script type="text/javascript">
-
-
-
-var basicDate = "20202020;"
-var sun = 0;
-var mon = 1;
-var tue = 2;
-var wed = 3;
-var thu = 4;
-var fri = 5;
-var sat = 6;
-
-var imgType = {
-	busy: 'busyGuy',
-	sleep: 'sleepGuy',
-	drunk: 'drunkGuy'
-}
-
-var colorDate = {
-	today : 'red',
-	nightwork : 'lightgrey',
-	daywork : 'yellow',
-	notmonth : 'grey',
-	normal : 'white',
-	event : 'pink'
-}
-
-var blackDateSolar = {
-	'0926':'고은생일',
-	'1025':'욘생일',       
-	'0803':'욘동생생일',       
-	'1202':'욘첫데이트',
-	'0224':'욘결혼기념일',
-	'0604':'욘처남',
-	'1212':'욘장인생신',
-	'0918':'욘장모생신',
-	'0206':'섹동생생일',       
-	'1006':'섹생일',       
-	'1118':'섹여친생일',       
-	'0130':'섹첫데이트',       
-	'0810':'콩생일',       
-	'0409':'태하생일',       
-	'0825':'콩결혼기념일',
-	'0222':'콩첫데이트',
-	'0613':'섹결혼기념일'
-}
-
-var blackDateLunar = {
-	'0130':'욘아버지생신',
-	'0811':'욘어머니생신',
-	'0824':'콩아버지생신',
-	'0629':'콩어머니생신',
-	'0214':'콩장인생신',
-	'0210':'콩장모생신',
-	'0918':'섹어머니기일',
-	'0119':'섹아버지생신'
-}
-var chkBlackDate = function(year, month, date){
-	var chkDateLunar = moment().year(year).month(month).date(date).lunar().format('MMDD')
-	
-	month = month+1
-
-	if(month < 10){
-		month = '0'+month;
-	}
-	if(date < 10){
-		date = '0'+date;
-	}
-	var chkDate = month+''+date;
-	
-	
-	
-	if(blackDateLunar.hasOwnProperty(chkDateLunar)){
-		return 'x';
-	}else if(blackDateSolar.hasOwnProperty(chkDate)){
-		return 'x';
-	}else{
-		return date;
-	}
-	
-
-}
-
-var chkColor = function(year, month, date) {
-	//기준날짜 2020/11/23 야간시작
-	var date1 = new Date(2020, 9, 11);
-	var date2 = new Date(year, month, date);
-		
-	var elapsedMSec = date2.getTime() - date1.getTime(); // 172800000
-	var elapsedDay = elapsedMSec / 1000 / 60 / 60 / 24;
-	var elapsedWeek = elapsedDay + (7-elapsedDay % 7);
-	var modVal = elapsedWeek % 4;
-	var today = new Date();
-
-	var result = colorDate['normal'];
-	
-	
-	
-	
-	
-	switch (modVal) {
-	case 0:
-		result = colorDate['nightwork']
-		break;
-	case 1:
-		result = colorDate['nightwork']
-		break;
-	case 2:
-		result = colorDate['daywork']
-		break;
-	case 3:
-		result = colorDate['daywork']
-		break;
-	
-
-	default:
-		break;
-	}
-	
-	if ((date2.getMonth() == today.getMonth()) &&	(date2.getFullYear() == today.getFullYear()) &&	(date2.getDate() == today.getDate())){
-		result = colorDate['today']
-	}	
-	if (date2.getDay() == 0){
-		result = colorDate['normal']	
-	}
-	//승섹 토요일 근무가 사라지는 관계로 해당 로직 주석처리
-	/* if (date2.getDay() == 6 && modVal==3){
-		result = colorDate['daywork']
-	}else if(date2.getDay() == 6){
-		result = colorDate['normal']
-	} */
-	if(date2.getDay() == 6){
-		result = colorDate['normal']
-	}
-	
-	var result_date = chkBlackDate(year, month, date)
-	
-	if(result_date == 'x'){
-		result = colorDate['nightwork']
-	}
-	
-	var resultOnClick = 'dateClick('+year+','+month+','+date+')' 
-	if((date2.getDay() == 6) || (date2.getDay() == 0) || (date2.getDay() == 5)){
-		resultOnClick = 'dateClick('+year+','+month+','+date+',\''+imgType['busy']+'\')' 
-	}else if(result == colorDate['nightwork']){
-		resultOnClick = 'dateClick('+year+','+month+','+date+',\''+imgType['sleep']+'\')'
-	}else if(result == colorDate['daywork']){
-		resultOnClick = 'dateClick('+year+','+month+','+date+',\''+imgType['drunk']+'\')'
-	}
-	
-	console.log(date2.getDay(),resultOnClick)
-	
-	
-
-	var result_data = {
-		type:result,
-		date:result_date,
-		onClick:resultOnClick
-	}
-	
-	console.log(result_data)
-	
-	return result_data;
-
-}
-
-var dateClick = function(year, month, date, imgTypeInput){
-	
-	var chkDateLunar = moment().year(year).month(month).date(date).lunar().format('MMDD')
-	month = month+1
-
-	if(month < 10){
-		month = '0'+month;
-	}
-	
-	if(date < 10){
-		date = '0'+date;
-	}
-	var chkDate = month+''+date;
-	
-	var msg = '';
-	
-	console.log('입력날짜', chkDate, chkDateLunar)
-	if(blackDateLunar.hasOwnProperty(chkDateLunar)){
-		console.log('음력', blackDateLunar[chkDateLunar])
-		//alert(blackDateLunar[chkDateLunar]);
-		msg += blackDateLunar[chkDateLunar]
-	}else if(blackDateSolar.hasOwnProperty(chkDate)){
-		console.log('양력', blackDateSolar[chkDate])
-		//alert(blackDateSolar[chkDate]);
-		
-		if(msg != ''){
-			msg += '<br>';
-		}
-		msg +=blackDateSolar[chkDate]
-		
-	}else{
-		
-	}
-	
-	if(msg != ''){
-		alert(msg)
-	}else{
-		if(imgTypeInput){
-			console.log('click', imgTypeInput)
-			$('#'+imgTypeInput).show();			
-		}
-		
-	}
-	 
-}
-
-
-var makeData = function(year, month) {
-	var html = ''
-	var maxDay = 32 - new Date(year, month, 32).getDate();
-
-	//7*5 데이터 만들기
-	
-	var firstDate = new Date(year, month, 1);
-	var firstDayOfWeek = firstDate.getDay();
-
-	var dateList = [];
-
-	//지난달
-	for (var i = 0; i < firstDayOfWeek; i++) {
-		var tempDate = new Date(year, month, 1)
-		var yesterday = new Date(tempDate.setDate(tempDate.getDate()
-				- (i + 1)));
-				
-		dateList.push({
-			type : colorDate['notmonth'],
-			date : yesterday.getDate()
-		})
-
-	}
-	dateList = dateList.reverse();
-	console.log('1차 길이', dateList.length)
-	//이번달
-	for (var i = 1; i < maxDay + 1; i++) {
-		
-		/* dateList.push({
-			type : chkColor(year, month, i),
-			date : i
-		}) */
-		dateList.push(chkColor(year, month, i));
-		
-	}
-	console.log('2차 길이', dateList.length)
-	console.log(dateList)
-	
-	var listExtension = 35 - dateList.length
-
-	//다음달
-	for (var i = 0; i < listExtension; i++) {
-		var tempDate = new Date(year, month, maxDay)
-		var tomorrow = new Date(tempDate.setDate(tempDate.getDate()
-				+ (i + 1)));
-		dateList.push({
-			type : colorDate['notmonth'],
-			date : tomorrow.getDate()
-		})
-		
-	}
-	console.log('3차 길이', dateList.length)
-	console.log(dateList)
-	
-	
-	var resultList = [];
-	for (var i = 0; i < 5; i++) {
-		resultList.push(dateList.splice(0,7))
-	}
-	
-	
-	//반복문 표현할 주수
-	for (var w = 0; w < resultList.length; w++) {
-		html += '<tr>';
-		for (var i = 0; i < resultList[w].length; i++) {
-			console.log()
-			if(resultList[w][i].onClick){
-				html += '<td style="background-color:'+resultList[w][i].type+';" onClick="'+resultList[w][i].onClick+'">';
-			}else{
-				html += '<td style="background-color:'+resultList[w][i].type+';">';	
-			}
-			
-			html += resultList[w][i].date
-			html += '</td>';
-			
-		}
-		html += '</tr>';
-	}
-
-	$('#dataBody').html('').html(html);
-	
-	$('#year').text(year)
-	$('#month').text(month + 1)
-}
-
-$(document).ready(function() {
-	//오늘 달과 년 찾기
-	var today = new Date();
-
-	makeData(today.getFullYear(), today.getMonth())
-	
-
-	$('#btn_left').click(function() {
-		//이전달 데이터 생성
-		var year = $('#year').text()
-		var month = $('#month').text() -1
-		var temp = new Date(year, month)
-		temp.setMonth(temp.getMonth() - 1)
-		
-		makeData(temp.getFullYear(), temp.getMonth())
-	})
-
-	$('#btn_right').click(function() {
-		//다음달 데이터 생성
-		var year = $('#year').text()
-		var month = $('#month').text() -1
-		var temp = new Date(year, month)
-		temp.setMonth(temp.getMonth() + 1)
-		
-		makeData(temp.getFullYear(), temp.getMonth())
-	})
-	
-	$('.modal').click(function(){
-		$('.modal').hide();
-	})
-
-})
-</script>
+    #noQRFound {
+      text-align: center;
+    }
+  </style>
 </head>
-
 <body>
-	
-	<div style="height: 10%; width: 100%; display: flex;">
-		<span id="btn_left" class="btn"style="flex: 1; text-align: center; font-size: 15px;">전달섹◀</span> 
-		<span style="flex: 1; text-align: center; font-size: 30px; display: contents;">
-			<p style='color:hotpink'>♡승&nbsp;&nbsp;</p>
-			<p id="year">2020</p>
-			<p>.</p>
-			<p id="month">11</p>
-			<p style='color:hotpink'>&nbsp;&nbsp;섹♡</p>
-		</span> <span id="btn_right" class="btn" style="flex: 1; text-align: center; font-size: 15px;">▶담달섹</span>
-	</div>
-	<div style="width: 100%; display: flex;">
-		<table
-			style="width: 80%;left: 14%;position: absolute;text-align: center;margin-top: 4%;font-size:25px;top: 104px;">
-			<thead>
-				<tr>
-					<td>일</td>
-					<td>월</td>
-					<td>화</td>
-					<td>수</td>
-					<td>목</td>
-					<td>금</td>
-					<td>토</td>
-				</tr>
-			</thead>
-			<tbody id='dataBody'>
-			</tbody>
-		</table>
-	</div>
-	<div style="width: 100%;top: 500px;position: absolute;left: 10px;background-color:lightgrey;">
-		<p><font style='color:hotpink'>승섹</font>의 근무주기를 표시합니다. <br>2020.10 이전은 반영되지 않습니다.</p>
-		<p><font style='color:red'>빨강</font>은 오늘을 의미합니다.</p>
-		<p><font style='color:grey'>회색</font>은 야간조 이거나 다른 달을 의미합니다. <br>달력을 이동해 주세요.</p>
-		<p><font style='color:yellow'>노랑</font>은 주간조 입니다. 토요일의 근무 여부도 반영됩니다.</p>
-	</div>
-	<div id="drunkGuy" class='modal' >
-		<font style='color:hotpink;'>난 술먹을 수 있섹♡<br>(ᶘ◕‿ᴥ‿◕ ᶅ) </font>
-		<img src='img/drunk.jpg' style="width:100%"/>
-	</div>
-	<div id="sleepGuy" class='modal' >
-		<font style='color:hotpink;height:30px;'>쯩쩌기눈 너무 쫄린뎁<br>(｡•́︿•̀｡) </font>
-		<img src='img/sleep.jpg' style="width:100%"/>
-	</div>
-	<div id="busyGuy" class='modal' >
-		<font style='color:hotpink;height:30px;'>콩이 바빠요ㅠㅠ </font>
-		<img src='img/busy.jpg' style="width:100%"/>
-	</div>
-</body>
+  <h1>jsQR Demo</h1>
+  <a id="githubLink" href="https://github.com/cozmo/jsQR">View documentation on Github</a>
+  <p>Pure JavaScript QR code decoding library.</p>
+  <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+  <canvas id="canvas" hidden></canvas>
+  <div id="output" hidden>
+    <div id="outputMessage">No QR code detected.</div>
+    <div hidden><b>Data:</b> <span id="outputData"></span></div>
+  </div>
+  <script>
+    var video = document.createElement("video");
+    var canvasElement = document.getElementById("canvas");
+    var canvas = canvasElement.getContext("2d");
+    var loadingMessage = document.getElementById("loadingMessage");
+    var outputContainer = document.getElementById("output");
+    var outputMessage = document.getElementById("outputMessage");
+    var outputData = document.getElementById("outputData");
 
+    function drawLine(begin, end, color) {
+      canvas.beginPath();
+      canvas.moveTo(begin.x, begin.y);
+      canvas.lineTo(end.x, end.y);
+      canvas.lineWidth = 4;
+      canvas.strokeStyle = color;
+      canvas.stroke();
+    }
+
+    // Use facingMode: environment to attemt to get the front camera on phones
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+      video.play();
+      requestAnimationFrame(tick);
+    });
+
+    function tick() {
+      loadingMessage.innerText = "⌛ Loading video..."
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+        outputContainer.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        var code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+          outputMessage.hidden = true;
+          outputData.parentElement.hidden = false;
+          outputData.innerText = code.data;
+        } else {
+          outputMessage.hidden = false;
+          outputData.parentElement.hidden = true;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+  </script>
+</body>
 </html>
