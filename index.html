@@ -37,11 +37,26 @@
 		padding-top:10px;
 		display:none;
 	}
+	.circle {
+        margin: 0 auto;
+        width: 30px;
+        height: 30px;
+        border: 10px solid rgb(163, 151, 198);
+        border-radius: 50%;
+        display: flex;
+	    justify-content: center;
+	    align-items: center;
+    }
+    .wrapper {
+        margin: 0 auto;
+        padding: 30px;
+        max-width: 1170px;
+    }
 </style>
 </head>
 
 <script type="text/javascript">
-	var qrMsg = "http://qr.nlotto.co.kr/?v=0747m011821252728m020710112628m030609172528m040715182428m0709121423281614207942"
+	var qrMsg = "http://qr.nlotto.co.kr/?v=0747m011821252728m020710112637m030609172528m040715182428m040715183642m0709121423281614207942"
 	var total_selected_num_list =[]
 	var base_num_list = []
 	
@@ -133,12 +148,29 @@
 		//qrParsing()
 	}
 	
+	/* var color_dict = {
+			0: 'coral',
+			10:'yellow',
+			20:'yellowgreen',
+			30:'cornflowerblue',
+			40:'mediumpurple'
+	} */
+	var color_dict = {
+			0: 'rgb(183,222,210)',
+			10:'rgb(246,166,178)',
+			20:'rgb(247,194,151)',
+			30:'rgb(255,236,184)',
+			40:'rgb(144,210,216)'
+	}
+	
+	
 	//데이터 파싱
 	function qrParsing(){
 		var msg = qrMsg;
 		//http://qr.nlotto.co.kr/?v=0747m011821252728m020710112628m030609172528m040715182428m0709121423281614207942
 		
 		var table_html = ""
+		table_html += '<tr> <td colspan=7 id="select_user_list"> 추천에 포함할 번호를 선택해 주세요. </td></tr>'
 		//var split_list = msg.split("m");
 		
 		var split_list = msg.match(/[a-z]\d{12}/gi);
@@ -165,12 +197,15 @@
 				});
 			
 			//여기서 부터 html 코드
+			
 			table_html += '<tr>';
+			
 			table_html += '<td>'+ i +'</td>';
 			
 			for (var j = 0; j < selected_num_list.length; j++) {
 				var array_element = selected_num_list[j];
-				table_html += '<td>' + array_element + '</td>';
+				//table_html += '<td style="background-color:'+ color_dict[Math.floor(array_element/10)*10] +'">' + array_element + '</td>';
+				table_html += '<td><div id="qr_'+i+'_'+j+'" onClick="qrClick(\'qr_'+i+'_'+j+'\')" class="circle" style="border-color:'+ color_dict[Math.floor(array_element/10)*10] +'">' + array_element + '</div></td>';
 			
 			}
 			
@@ -186,7 +221,7 @@
 	}
 	
 	
-	function lottoNum (max_int, array) {
+	/* function lottoNum (max_int, array) {
 		if (! array) {
 			var array = [];
 		}
@@ -203,66 +238,142 @@
 		} else{
 			return lottoNum(max_int,array);
 		}
+	} */
+	
+	function lottoNum (max_ran, max_int, array) {
+		if (! array) {
+			var array = [];
+		}
+		
+		let n = Math.floor(Math.random() * max_int);
+		
+		if (array.length < max_ran && array.indexOf(n) < 0) {
+			array.push(n);
+			return lottoNum(max_ran, max_int,array);
+		
+		} else if(array.length>max_ran-1) {
+			return array;
+			
+		} else{
+			return lottoNum(max_ran, max_int,array);
+		}
 	}
 
-		
 	
 	
 	function randomPick(){
 		console.log('----------------------------------------------------------')
+		console.log(filter_num_list)
+		console.log(clicked_num_list)
+		
+		
+		var find_num = 6-clicked_num_list.length
+		
 		var table_html = ""
+		
+		for (var i = 0; i < 5; i++) {
+		
+		
+			var random_list = [...clicked_num_list];
 			
-			for (var i = 1; i < 6; i++) {
+			//filter_num_idx_list = lottoNum(filter_num_list.length-1)
+			filter_num_idx_list = lottoNum(find_num, filter_num_list.length-1)
+			
+			
+			for (var k = 0; k < find_num; k++) {
+				random_list.push(filter_num_list[filter_num_idx_list[k]])
 				
-				filter_num_idx_list = lottoNum(filter_num_list.length-1)
-				filter_num_idx_list.sort(function(a, b)  {
+			}
+			random_list.sort(function(a, b)  {
 				  if(a > b) return 1;
 				  if(a === b) return 0;
 				  if(a < b) return -1;
 				});
-				console.log(filter_num_idx_list)
-				
-				var num1 = filter_num_list[filter_num_idx_list[0]]
-				var num2 = filter_num_list[filter_num_idx_list[1]]
-				var num3 = filter_num_list[filter_num_idx_list[2]]
-				var num4 = filter_num_list[filter_num_idx_list[3]]
-				var num5 = filter_num_list[filter_num_idx_list[4]]
-				var num6 = filter_num_list[filter_num_idx_list[5]]
-				
-				
-				var selected_num_list = [num1, num2, num3, num4, num5, num6];
-				
-				total_selected_num_list = total_selected_num_list.concat(selected_num_list);
-				total_selected_num_list = [...new Set(total_selected_num_list)]
-				total_selected_num_list.sort(function(a, b)  {
-					  if(a > b) return 1;
-					  if(a === b) return 0;
-					  if(a < b) return -1;
-					});
-				
-				//여기서 부터 html 코드
-				table_html += '<tr>';
-				table_html += '<td>'+ i +'</td>';
-				
-				for (var j = 0; j < selected_num_list.length; j++) {
-					var array_element = selected_num_list[j];
-					table_html += '<td>' + array_element + '</td>';
-				
-				}
-				table_html += '</tr>';
-				
-			}	
 			
-			$('#dataBody2').html('').html(table_html);
+			
+			var num1 = random_list[0]
+			var num2 = random_list[1]
+			var num3 = random_list[2]
+			var num4 = random_list[3]
+			var num5 = random_list[4]
+			var num6 = random_list[5]
+			
+			
+			//여기서 부터 html 코드
+			table_html += '<tr>';
+			table_html += '<td>'+ (i+1) +'</td>';
+			
+			for (var j = 0; j < random_list.length; j++) {
+				var array_element = random_list[j];
+				//table_html += '<td>' + array_element + '</td>';
+				table_html += '<td><div id="new_'+i+'_'+j+'" onClick="qrClick(\'new_'+i+'_'+j+'\')" class="circle" style="border-color:'+ color_dict[Math.floor(array_element/10)*10] +'">' + array_element + '</div></td>';
+			
+			}
+			table_html += '</tr>';
+			
+		} 
+		$('#dataBody2').html('').html(table_html);
 		
 	}
 	
+	var clicked_num_list = []
+	
+	function qrClick(id){
+		var clicked_num = $('#'+id)[0].innerText
+		clicked_num = Number(clicked_num)
+		
+		
+		if (clicked_num_list.indexOf(clicked_num) < 0){
+			if (clicked_num_list.length == 6){
+				alert('6개 넘게 추가할 수 없습니다.')	
+				return
+			}
+			$('#dataBody div').each(function(index, item){
+				if (item.innerText == clicked_num){
+					$('#'+item.id).css('border-color', 'red')
+				}
+			})
+			clicked_num_list.push(clicked_num)
+			
+		}else{
+			$('#dataBody div').each(function(index, item){
+				if (item.innerText == clicked_num){
+					$('#'+item.id).css('border-color', color_dict[Math.floor(clicked_num/10)*10])
+				}
+			})
+			
+			clicked_num_list.splice(clicked_num_list.indexOf(clicked_num),1)
+			
+		}
+		
+		select_msg_represent()
+	}
+	
+	function select_msg_represent(){
+		if (clicked_num_list.length==0){
+			$('#select_user_list').html(' 추천에 포함할 번호를 선택해 주세요. ')
+		}else{
+			var msg = '  선택한 번호는 '
+			
+			for (var i = 0; i < clicked_num_list.length; i++) {
+				var select_num = clicked_num_list[i];
+				msg =  msg + select_num
+				
+				if (i != clicked_num_list.length -1){
+					msg = msg + ', ';
+				}
+				
+				
+			}
+			msg = msg + '입니다.  <br> 이 번호를 다음 추천에 포함할게요.';
+			$('#select_user_list').html(msg)
+		}
+	}
 	
 </script>
 
 <body>
 <div class="main_page">
-	
 	<main align="center">
 	<h1>한장만 더?test3</h1>
 	<div id='qrFrame' align="center" class='modal'>
@@ -281,20 +392,20 @@
 	<div></div>
 	<div id="test" width="100%">
 		<h4>QR 코드 스캔 결과</h4>
-		<table style="width: 80%;left: 10%;text-align: center;margin-top: 4%;">
-			<thead>
+		<table id='qrtable' style="width: 100%;text-align: center;margin-top: 4%;">
+			<!-- <thead>
 				<tr>
 					<td>게임</td>
-					<td>num1</td>
-					<td>num2</td>
-					<td>num3</td>
-					<td>num4</td>
-					<td>num5</td>
-					<td>num6</td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
 				</tr>
-			</thead>
+			</thead> -->
 			<tbody id='dataBody'>
-				<tr> <td colspan=7> qr코드를 스캔해 주세요 </td></tr>
+				<tr> <td colspan=7> 🎥 QR 코드를 스캔해 주세요 </td></tr>
 			</tbody>
 		</table>
 			
@@ -314,8 +425,8 @@
 	<br/>
 	<div id="test2" width="100%">
 		<h4>한장 더 뽑을 번호</h4>
-		<table style="width: 80%;left: 10%;text-align: center;margin-top: 4%;">
-			<thead>
+		<table style="width: 100%;text-align: center;margin-top: 4%;">
+<!-- 			<thead>
 				<tr>
 					<td>게임</td>
 					<td>num1</td>
@@ -325,9 +436,9 @@
 					<td>num5</td>
 					<td>num6</td>
 				</tr>
-			</thead>
+			</thead> -->
 			<tbody id='dataBody2'>
-				<tr> <td colspan=7> qr코드를 스캔해 주세요 </td></tr>
+				<tr> <td colspan=7> QR코드를 스캔해 주세요 </td></tr>
 			</tbody>
 		</table>
 	</div>
